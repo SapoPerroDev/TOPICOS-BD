@@ -3,7 +3,7 @@ CREATE DATABASE chickeggs;
 
 -- tabla de granjero
 CREATE TABLE Granjero (
-    id_granjero int primary key,
+    id_granjero serial primary key,
     primer_nombre varchar(30) not null,
     segundo_nombre varchar(30),
     primer_apellido varchar(30) not null,
@@ -16,7 +16,7 @@ CREATE TABLE Granjero (
 );
 
 create table Granja (
-	id_granja int primary key,
+	id_granja serial primary key,
 	id_granjero int not null,
 	nombre varchar(60) not null,
 	ubicacion varchar(255),
@@ -25,7 +25,7 @@ create table Granja (
 
 -- tabla de corral
 CREATE TABLE Corral (
-    id_corral int primary key,
+    id_corral serial primary key,
     id_granja int not null,
     codigo_corral varchar(20) unique not null,
     nombre varchar(30) not null,
@@ -35,7 +35,7 @@ CREATE TABLE Corral (
 );
 
 CREATE TABLE Gallina (
-    id_gallina int primary key,
+    id_gallina serial primary key,
     id_corral int not null,
     codigo_gallina varchar(20) unique not null,
     raza varchar(40),
@@ -46,7 +46,7 @@ CREATE TABLE Gallina (
 );
 
 CREATE TABLE Produccion (
-    id_produccion int primary key,
+    id_produccion serial primary key,
     id_corral int not null,
     fecha date not null,
     observacion text,
@@ -54,14 +54,14 @@ CREATE TABLE Produccion (
 );
 
 create table Clasificacion_peso (
-	id_clasificacion_peso int primary key,
+	id_clasificacion_peso serial primary key,
 	nombre varchar(40) not null,
 	peso_min decimal(5, 2),
 	peso_max decimal(5, 2)
 );
 
 CREATE TABLE Detalles_produccion (
-    id_detalle int primary key,
+    id_detalle serial primary key,
     id_produccion int not null,
     id_clasificacion_peso int not null,
     cantidad int not null,
@@ -71,8 +71,8 @@ CREATE TABLE Detalles_produccion (
 );
 
 create table Inventario_huevos (
-    id_inventario int primary key,
-    id_clasificacion_peso int not null,
+    id_inventario serial primary key,
+    id_clasificacion_peso int not null unique,
     cubetas int not null default 0,       -- número de cubetas completas (30 huevos)
     sueltos int not null default 0,       -- huevos que no completan cubeta
     stock_total int generated always as (cubetas * 30 + sueltos) stored,
@@ -80,7 +80,7 @@ create table Inventario_huevos (
 );
 
 create table Movimiento_huevos (
-    id_movimiento int primary key,
+    id_movimiento serial primary key,
     id_inventario int not null,
     id_detalle int null,
     tipo_movimiento VARCHAR(20) NOT NULL CHECK (tipo_movimiento IN ('fresco', 'en_transito', 'vendido')),
@@ -93,13 +93,13 @@ create table Movimiento_huevos (
 );
 
 CREATE TABLE Categoria (
-    id_categoria int primary key ,
+    id_categoria serial primary key ,
     nombre varchar(50) not null,   -- Ej: Alimentos, Medicamentos, Materiales, Otros
     descripcion varchar(200)
 );
 
 CREATE TABLE Producto (
-    id_producto int primary key,
+    id_producto serial primary key,
     nombre varchar(100) not null,
     descripcion text,
     volumen int not null,
@@ -112,7 +112,7 @@ CREATE TABLE Producto (
 
 
 CREATE TABLE Movimiento (
-    id_movimiento int primary key,
+    id_movimiento serial primary key,
     id_producto int not null,
     id_granjero int not null,
     tipo_movimiento VARCHAR(10) NOT NULL CHECK (tipo_movimiento IN ('Entrada', 'Salida')),
@@ -125,13 +125,12 @@ CREATE TABLE Movimiento (
 
 -- Tabla para registrar todos los cambios que se den en las tablas
 CREATE TABLE auditoria (
-    id_auditoria int primary key,
-    id_granjero int null,                           -- usuario que hizo la acción
-    accion varchar(50) not null,                    -- acción: insert, update, delete, login, logout, acceso, error
-    tabla_afectada varchar(100) not null,           -- tabla o módulo afectado
-    id_registro_afectado int null,                  -- id del registro que cambió
-    valores_anteriores jsonb null,                  -- si aplica, estado previo
-    valores_nuevos jsonb null,                      -- si aplica, estado nuevo
-    fecha timestamp default current_timestamp,
-    foreign key (id_granjero) references granjero(id_granjero)
+    id_auditoria serial primary key,
+    id_granjero varchar(50) null,
+    accion varchar(50) not null,
+    tabla_afectada varchar(100) not null,
+    id_registro_afectado int null,
+    valores_anteriores jsonb null,
+    valores_nuevos jsonb null,
+    fecha timestamp default current_timestamp
 );
